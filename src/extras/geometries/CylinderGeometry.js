@@ -28,11 +28,12 @@ THREE.CylinderGeometry = function ( radiusTop, radiusBottom, height, segmentsRad
 
 			var u = x / segmentsX;
 
-			var xpos = radius * Math.sin( u * Math.PI * 2 );
-			var ypos = - v * height + heightHalf;
-			var zpos = radius * Math.cos( u * Math.PI * 2 );
+			var vertex = new THREE.Vector3();
+			vertex.x = radius * Math.sin( u * Math.PI * 2 );
+			vertex.y = - v * height + heightHalf;
+			vertex.z = radius * Math.cos( u * Math.PI * 2 );
 
-			this.vertices.push( new THREE.Vertex( new THREE.Vector3( xpos, ypos, zpos ) ) );
+			this.vertices.push( vertex );
 
 			verticesRow.push( this.vertices.length - 1 );
 			uvsRow.push( new THREE.UV( u, v ) );
@@ -51,13 +52,13 @@ THREE.CylinderGeometry = function ( radiusTop, radiusBottom, height, segmentsRad
 
 		if ( radiusTop !== 0 ) {
 
-			na = this.vertices[ vertices[ 0 ][ x ] ].position.clone();
-			nb = this.vertices[ vertices[ 0 ][ x + 1 ] ].position.clone();
+			na = this.vertices[ vertices[ 0 ][ x ] ].clone();
+			nb = this.vertices[ vertices[ 0 ][ x + 1 ] ].clone();
 
 		} else {
 
-			na = this.vertices[ vertices[ 1 ][ x ] ].position.clone();
-			nb = this.vertices[ vertices[ 1 ][ x + 1 ] ].position.clone();
+			na = this.vertices[ vertices[ 1 ][ x ] ].clone();
+			nb = this.vertices[ vertices[ 1 ][ x + 1 ] ].clone();
 
 		}
 		
@@ -92,7 +93,7 @@ THREE.CylinderGeometry = function ( radiusTop, radiusBottom, height, segmentsRad
 
 	if ( !openEnded && radiusTop > 0 ) {
 
-		this.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, heightHalf, 0 ) ) );
+		this.vertices.push( new THREE.Vector3( 0, heightHalf, 0 ) );
 
 		for ( x = 0; x < segmentsX; x ++ ) {
 
@@ -119,7 +120,7 @@ THREE.CylinderGeometry = function ( radiusTop, radiusBottom, height, segmentsRad
 
 	if ( !openEnded && radiusBottom > 0 ) {
 
-		this.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, - heightHalf, 0 ) ) );
+		this.vertices.push( new THREE.Vector3( 0, - heightHalf, 0 ) );
 
 		for ( x = 0; x < segmentsX; x ++ ) {
 

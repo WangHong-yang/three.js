@@ -95,17 +95,42 @@
 					background-color: #f9f9f9;
 					overflow: auto;
 				}
+
+			#button {
+				position: fixed;
+				top: 20px;
+				right: 30px;
+				padding: 8px;
+				color: #fff;
+				background-color: #555;
+				opacity: 0.5;
+			}
+
+				#button:hover {
+					cursor: pointer;
+					opacity: 1;
+				}
 		</style>
 	</head>
 	<body>
 		<div id="panel"></div>
 		<div id="viewer"></div>
+		<div id="button">Edit this page</div>
 
 		<script>
-			var REVISION = '48';
+			var REVISION = '49';
+
+			var path = null;
 
 			var panel = document.getElementById( 'panel' );
 			var viewer = document.getElementById( 'viewer' );
+			var button = document.getElementById( 'button' );
+
+			button.addEventListener( 'click', function ( event ) {
+
+				window.open( 'https://github.com/mrdoob/three.js/blob/dev/docs/api/' + path + '.html' );
+
+			}, false );
 
 			var pages = {
 				"Integer": "Integer",
@@ -140,8 +165,7 @@
 					{ name: "UV", path: "core/UV" },
 					{ name: "Vector2", path: "core/Vector2" },
 					{ name: "Vector3", path: "core/Vector3" },
-					{ name: "Vector4", path: "core/Vector4" },
-					{ name: "Vertex", path: "core/Vertex" }
+					{ name: "Vector4", path: "core/Vector4" }
 				],
 
 				"Lights": [
@@ -150,6 +174,14 @@
 					{ name: "DirectionalLight", path: "lights/DirectionalLight" },
 					{ name: "PointLight", path: "lights/PointLight" },
 					{ name: "SpotLight", path: "lights/SpotLight" }
+				],
+
+
+				"Loaders": [
+					{ name: "Loader", path: "loaders/Loader" },
+					{ name: "BinaryLoader", path: "loaders/BinaryLoader" },
+					{ name: "JSONLoader", path: "loaders/JSONLoader" },
+					{ name: "SceneLoader", path: "loaders/SceneLoader" },
 				],
 
 				"Materials": [
@@ -272,15 +304,6 @@
 					{ name: "CameraHelper", path: "extras/helpers/CameraHelper" }
 				],
 
-				"Extras / Loaders": [
-					{ name: "Loader", path: "extras/loaders/Loader" },
-					{ name: "BinaryLoader", path: "extras/loaders/BinaryLoader" },
-					{ name: "ColladaLoader", path: "extras/loaders/ColladaLoader" },
-					{ name: "JSONLoader", path: "extras/loaders/JSONLoader" },
-					{ name: "SceneLoader", path: "extras/loaders/SceneLoader" },
-					{ name: "UTF8Loader", path: "extras/loaders/UTF8Loader" }
-				],
-
 				"Extras / Modifiers": [
 					{ name: "SubdivisionModifier", path: "extras/modifiers/SubdivisionModifier" }
 				],
@@ -290,10 +313,11 @@
 					{ name: "MarchingCubes", path: "extras/objects/MarchingCubes" }
 				],
 
-				"Extras / Renderers": [
-					{ name: "AnaglyphWebGLRenderer", path: "extras/renderers/AnaglyphWebGLRenderer" },
-					{ name: "CrosseyedWebGLRenderer", path: "extras/renderers/CrosseyedWebGLRenderer" },
-					{ name: "ParallaxBarrierWebGLRenderer", path: "extras/renderers/ParallaxBarrierWebGLRenderer" }
+				"Extras / Renderers / Effects": [
+					{ name: "AnaglyphEffect", path: "extras/renderers/effects/AnaglyphEffect" },
+					{ name: "CrosseyedEffect", path: "extras/renderers/effects/CrosseyedEffect" },
+					{ name: "ParallaxBarrierEffect", path: "extras/renderers/effects/ParallaxBarrierEffect" },
+					{ name: "StereoEffect", path: "extras/renderers/effects/StereoEffect" }
 				],
 
 				"Extras / Renderers / Plugins": [
@@ -335,7 +359,7 @@
 
 			function goTo( name ) {
 
-				var path = pages[ name ];
+				path = pages[ name ];
 
 				window.location.hash = name;
 				viewer.innerHTML = '';
@@ -346,12 +370,17 @@
 
 					if ( xhr.readyState == 4 && ( xhr.status == 200 || xhr.status == 0 ) ) {
 
+						// TODO: Set title.
+
 						var text = xhr.responseText;
 						
 						text = text.replace(/\[name\]/gi, name);
 						text = text.replace(/\[path\]/gi, path);
-						text = text.replace(/\[page:(\w+)\]/gi, "<a href=\"javascript:goTo('$1')\" title=\"$1\">$1</a>" );
-						text = text.replace(/\[page:(\w+) ([\w|\.]+)\]/gi, "<a href=\"javascript:goTo('$1')\" title=\"$1\">$2</a>" );
+						text = text.replace(/\[page:(\w+)\]/gi, "[page:$1 $1]" ); // [page:name] to [page:name title]
+						text = text.replace(/\[page:(\w+) ([\w|\.]+)\]/gi, "<a href=\"javascript:goTo('$1')\" title=\"$1\">$2</a>" ); // [page:name title]
+						text = text.replace(/\[link:([\w|\:|\/|\.|\-|\_]+)\]/gi, "[link:$1 $1]" ); // [link:url] to [link:url title]
+						text = text.replace(/\[link:([\w|\:|\/|\.|\-|\_]+) ([\w|\:|\/|\.|\-|\_]+)\]/gi, "<a href=\"$1\"  target=\"_blank\">$2</a>" ); // [link:url title]
+						text = text.replace(/\*([\w|\ |\-|\/|\+|\-|\(|\)|\=|\,|\.\"]+)\*/gi, "<strong>$1</strong>" ); // *
 
 						viewer.innerHTML = '<br>' + text + '<br><br>';
 
@@ -363,7 +392,15 @@
 
 			}
 
-			goTo( window.location.hash.substring(1) );
+			function goToHash() {
+
+				goTo( window.location.hash.substring( 1 ) );
+
+			}
+			
+			window.addEventListener( 'hashchange', goToHash, false );
+
+			goToHash();
 
 			// Layout
 
